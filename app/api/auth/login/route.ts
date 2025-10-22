@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       }
     const client = await getMongoClient();
 
-    const db = client.db("hackaton-scti-agua");
+    const db = client.db("agroflux");
 
       // Busca usuário por email ou número de celular
       const user = await db.collection('users').findOne({ email });

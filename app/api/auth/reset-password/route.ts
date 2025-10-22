@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
         const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
         const client = await getMongoClient();
-        const db = client.db("hackaton-scti-agua");
+        const db = client.db("agroflux");
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 

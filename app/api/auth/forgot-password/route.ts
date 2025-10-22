@@ -7,7 +7,7 @@ export async function POST(request: Request) {
         const { email } = await request.json();
 
         const client = await getMongoClient();
-        const db = client.db("hackaton-scti-agua");
+        const db = client.db("agroflux");
 
         const user = await db.collection('users').findOne({ email });
 

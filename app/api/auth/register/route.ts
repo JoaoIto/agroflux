@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const { name, email, password } = await request.json()
     const client = await getMongoClient();
 
-    const db = client.db("hackaton-scti-agua");
+    const db = client.db("agroflux");
 
     // Check if user already exists
     const existingUser = await db.collection('users').findOne({ email })

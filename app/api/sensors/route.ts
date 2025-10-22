@@ -37,7 +37,7 @@ export async function GET() {
         console.log("UserId log: ", userId)
 
         const client = await getMongoClient();
-        const db = client.db("hackaton-scti-agua");
+        const db = client.db("agroflux");
 
         // Ajustando a consulta e fazendo o cast para ISensor[]
         const sensors = await db.collection('sensors')
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     try {
         const userId = await getUserIdFromToken()
         const client = await getMongoClient();
-        const db = client.db("hackaton-scti-agua");
+        const db = client.db("agroflux");
 
         const sensorData: Omit<ISensor, '_id'> = await request.json()
 

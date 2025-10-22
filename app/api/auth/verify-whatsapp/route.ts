@@ -13,7 +13,7 @@ export async function POST(request: Request) {
         }
 
         const client = await getMongoClient();
-        const db = client.db("hackaton-scti-agua");
+        const db = client.db("agroflux");
 
         const normalizedPhone = cel.replace(/\D/g, "");
         const user = await db.collection("users").findOne({
