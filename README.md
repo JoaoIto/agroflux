@@ -1,4 +1,4 @@
-# AgroFlux
+# AgroFlux - [DOCUMENTAÇÃO](https://github.com/kaiomaced0/hackathon-agroflux)
 
 **AgroFlux** é uma plataforma inovadora voltada para a **automação inteligente de irrigação** e a **gestão eficiente da água** no setor agropecuário. Utilizando sensores, mineração de dados e inteligência artificial (IA), o AgroFlux ajuda agricultores a otimizar o uso da água, garantindo a eficiência hídrica e reduzindo desperdícios, tudo de forma automatizada e acessível, desde pequenas hortas até grandes propriedades.
 
@@ -117,7 +117,7 @@ O AgroFlux é ideal para:
 1. **Clone o repositório**:
 
    ```bash
-   git clone https://github.com/kaiomaced0/hackathon-agroflux.git
+   git clone https://github.com/JoaoIto/agroflux.git
    cd agroflux
    ```
 
