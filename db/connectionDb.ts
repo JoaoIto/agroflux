@@ -17,8 +17,9 @@ const uri = process.env.MONGODB_URI
 const options = {
   useUnifiedTopology: true,
   useNewUrlParser: true,
-  ssl: true, // SSL deve estar habilitado
-  tlsInsecure: false, // Não permite protocolos inseguros
+  ssl: true,  // SSL deve estar habilitado para MongoDB Atlas
+  tlsAllowInvalidCertificates: true, // Permitir certificados inválidos, útil em testes
+  tlsInsecure: false,
 };
 
 let client = new MongoClient(uri, {
