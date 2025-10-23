@@ -11,7 +11,7 @@
 const { MongoClient, ObjectId } = require('mongodb');
 const fs = require('fs');
 
-const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const MONGODB_URI = 'mongodb://localhost:32768/agroflux';
 const DB_NAME = 'agroflux';
 
 // Argumentos da linha de comando
