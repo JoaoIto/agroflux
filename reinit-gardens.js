@@ -1,7 +1,8 @@
 // Script para limpar e reinicializar apenas a coleção gardens
 const { MongoClient } = require('mongodb');
 
-const MONGODB_URI = 'mongodb://localhost:32768/hackaton-scti-agua';
+const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const DB_NAME = 'agroflux';
 
 async function reinitGardens() {
   console.log('🔄 Reinicializando coleção gardens...\n');
@@ -12,7 +13,7 @@ async function reinitGardens() {
     client = new MongoClient(MONGODB_URI);
     await client.connect();
     
-    const db = client.db('hackaton-scti-agua');
+    const db = client.db(DB_NAME);
 
     // Limpar coleção gardens
     console.log('🗑️  Removendo gardens antigos...');

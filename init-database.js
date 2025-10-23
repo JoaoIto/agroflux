@@ -8,11 +8,11 @@
 //   node init-database.js --seed    - Criar dados de exemplo completos (zones, sensors, logs)
 
 const { MongoClient } = require('mongodb');
-const bcrypt = require('bcryptjs');
 
 // Configuração da URI do MongoDB (mesmo do .env.local)
-const MONGODB_URI = 'mongodb://localhost:32768/hackaton-scti-agua';
-const DB_NAME = 'hackaton-scti-agua';
+const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const DB_NAME = 'agroflux';
+const API_BASE_URL = 'http://localhost:3000';
 
 // Argumentos da linha de comando
 const args = process.argv.slice(2);
@@ -57,27 +57,41 @@ async function initDatabase() {
       await cleanDatabase(db);
     }    // ==================== COLEÇÃO: users ====================
     console.log('👥 Criando coleção: users');
-    await db.createCollection('users');
-    await db.collection('users').createIndex({ email: 1 }, { unique: true });
+    await db.createCollection('users').catch(() => {});
+    await db.collection('users').createIndex({ email: 1 }, { unique: true }).catch(() => {});
     console.log('   ✓ Índice único criado no campo email');
     
-    // Dados de exemplo - Usuário admin com senha hash real
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    const usersData = [
-      {
-        name: 'Admin AgroFlux',
-        email: 'admin@agroflux.com',
-        password: hashedPassword,
-        role: 'admin',
-        created_at: new Date(),
-        updated_at: new Date()
-      }
-    ];
-    
+    // Criar usuário via API /api/auth/register
     const usersCount = await db.collection('users').countDocuments();
     if (usersCount === 0) {
-      await db.collection('users').insertMany(usersData);
-      console.log('   ✓ Usuário admin criado (email: admin@agroflux.com, senha: admin123)\n');
+      console.log('   ℹ Criando usuário via API /api/auth/register...');
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'Produtor1',
+            email: 'produtor@email.com',
+            password: '123456'
+          })
+        });
+
+        if (response.ok) {
+          console.log('   ✓ Usuário criado com sucesso!');
+          console.log('   📧 Email: produtor@email.com');
+          console.log('   🔑 Senha: 123456\n');
+        } else {
+          const error = await response.json();
+          console.log(`   ⚠️  Erro ao criar usuário via API: ${error.error || 'Unknown error'}`);
+          console.log('   💡 Certifique-se de que o servidor está rodando em http://localhost:3000\n');
+        }
+      } catch (error) {
+        console.log('   ❌ Erro ao conectar com a API:', error.message);
+        console.log('   💡 Execute: npm run dev (em outro terminal)\n');
+      }
     } else {
       console.log('   ⚠ Coleção já contém dados\n');
     }

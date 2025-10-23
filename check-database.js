@@ -11,8 +11,8 @@
 const { MongoClient, ObjectId } = require('mongodb');
 const fs = require('fs');
 
-const MONGODB_URI = 'mongodb://localhost:32768/hackaton-scti-agua';
-const DB_NAME = 'hackaton-scti-agua';
+const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const DB_NAME = 'agroflux';
 
 // Argumentos da linha de comando
 const args = process.argv.slice(2);

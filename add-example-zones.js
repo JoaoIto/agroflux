@@ -1,7 +1,8 @@
 // Script para adicionar zonas de exemplo para cada tipo de produtor
 const { MongoClient, ObjectId } = require('mongodb');
 
-const MONGODB_URI = 'mongodb://localhost:32768/hackaton-scti-agua';
+const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const DB_NAME = 'agroflux';
 
 async function addExampleZones() {
   console.log('📍 Adicionando zonas de exemplo...\n');
@@ -12,7 +13,7 @@ async function addExampleZones() {
     client = new MongoClient(MONGODB_URI);
     await client.connect();
     
-    const db = client.db('hackaton-scti-agua');
+    const db = client.db(DB_NAME);
 
     // Buscar gardens
     const gardens = await db.collection('gardens').find({}).toArray();
