@@ -11,10 +11,8 @@ import { CropForm } from "./crop-form"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
     getWeatherData,
-    getWeatherForecast,
     getWeatherDescription,
     type WeatherData,
-    type WeatherForecast,
 } from "@/lib/weather-api"
 
 export function SmallProducerDashboard() {
@@ -22,7 +20,7 @@ export function SmallProducerDashboard() {
     const [selectedGarden, setSelectedGarden] = useState<string>("")
     const [showAddGarden, setShowAddGarden] = useState(false)
     const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
-    const [forecast, setForecast] = useState<WeatherForecast[]>([])
+    const [forecast, setForecast] = useState<WeatherData | null>(null)
     const [loading, setLoading] = useState(true)
     const [gardens, setGardens] = useState<IGarden[]>([])
     const [gardensError, setGardensError] = useState<string | null>(null)
@@ -75,13 +73,8 @@ export function SmallProducerDashboard() {
             setLoading(true)
             if(currentGarden) {
                 const weather = await getWeatherData(currentGarden.location.latitude, currentGarden.location.longitude)
-                const forecastData = await getWeatherForecast(
-                    currentGarden.location.latitude,
-                    currentGarden.location.longitude,
-                    7,
-                )
                 setWeatherData(weather)
-                setForecast(forecastData)
+                setForecast(weather)
                 setLoading(false)
             }
         }
