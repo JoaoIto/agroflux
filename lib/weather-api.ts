@@ -10,10 +10,18 @@ export interface WeatherData {
   temperatureMin: number
 }
 
+export interface WeatherForecast {
+  date: string
+  temperatureMax: number
+  temperatureMin: number
+  precipitation: number
+  humidity: number
+}
+
 export async function getWeatherData(lat: number, lng: number): Promise<WeatherData> {
   try {
     const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=shortwave_radiation_sum,et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min&hourly=soil_moisture_3_to_9cm,soil_temperature_18cm&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=America%2FSao_Paulo&past_days=1&forecast_days=3`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=shortwave_radiation_sum,et0_fao_evapotranspiration,temperature_2m_max,temperature_2m_min&hourly=soil_moisture_3_to_9cm,soil_temperature_18cm&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=America%2FSao_Paulo&past_days=1&forecast_days=3`,
     )
 
     if (!response.ok) {
@@ -37,7 +45,7 @@ export async function getWeatherData(lat: number, lng: number): Promise<WeatherD
       soilMoisture: latestSoilMoisture * 100, // converte p/ %
       date: current.time,
       temperatureMax: daily.temperature_2m_max ? daily.temperature_2m_max[0] : current.temperature_2m,
-      temperatureMin: daily.temperature_2m_min ? daily.temperature_2m_min[0] : current.temperature_2m
+      temperatureMin: daily.temperature_2m_min ? daily.temperature_2m_min[0] : current.temperature_2m,
     }
   } catch (error) {
     console.error("[v0] Error fetching weather data:", error)
@@ -51,8 +59,41 @@ export async function getWeatherData(lat: number, lng: number): Promise<WeatherD
       soilMoisture: 40,
       date: new Date().toISOString(),
       temperatureMax: 28,
-      temperatureMin: 18
+      temperatureMin: 18,
     }
+  }
+}
+
+export async function getWeatherForecast(lat: number, lng: number, days = 7): Promise<WeatherForecast[]> {
+  try {
+    const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m_mean&timezone=America/Sao_Paulo&forecast_days=${days}`,
+    )
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch weather forecast")
+    }
+
+    const data = await response.json()
+    const daily = data.daily
+
+    return daily.time.map((date: string, index: number) => ({
+      date,
+      temperatureMax: daily.temperature_2m_max[index],
+      temperatureMin: daily.temperature_2m_min[index],
+      precipitation: daily.precipitation_sum[index],
+      humidity: daily.relative_humidity_2m_mean[index],
+    }))
+  } catch (error) {
+    console.error("[v0] Error fetching weather forecast:", error)
+    // Return mock data as fallback
+    return Array.from({ length: days }, (_, i) => ({
+      date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      temperatureMax: 28 + Math.random() * 5,
+      temperatureMin: 18 + Math.random() * 5,
+      precipitation: Math.random() * 10,
+      humidity: 60 + Math.random() * 20,
+    }))
   }
 }
 
