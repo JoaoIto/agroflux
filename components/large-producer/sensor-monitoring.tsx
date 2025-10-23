@@ -36,7 +36,7 @@ export function SensorMonitoring() {
             try {
                 setLoading(true)
                 setError(null)
-                const response = await axios.get("/api/sensors?zone_id=68f90ebdd48e8e21583df061")
+                const response = await axios.get("/api/sensors?_id=68f90ebdd48e8e21583df061")
                 setSensors(response.data)
             } catch (err) {
                 console.error("[v0] Error fetching sensors:", err)
