@@ -309,8 +309,7 @@ Este projeto é licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICE
 
 Para dúvidas ou suporte, entre em contato via:
 - WhatsApp: +55 63 98414-2982
-- Email: suporte@agroflux.com.br
-
+- Agente de IA (WhatsApp): https://wa.me/5563984142982
 ---
 
 **AgroFlux** - Transformando a gestão da água na agricultura através da tecnologia e inteligência artificial. 🌱💧
