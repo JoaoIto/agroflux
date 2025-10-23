@@ -8,18 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Droplets, Power, PowerOff, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-type Sensor = {
-    _id: { $oid: string }
-    name: string
-    sensor_type: string
-    status: string
-    location: { latitude: number; longitude: number }
-    zone_id: string
-    data: Array<{ timestamp: { $date: string }; value: number }>
-}
-
 export function SensorMonitoring() {
-    const [sensors, setSensors] = useState<Sensor[]>([])
+    const [sensors, setSensors] = useState<ISensor[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -31,15 +21,61 @@ export function SensorMonitoring() {
         windSpeed: 12,
     })
 
+    const [gardenId, setGardenId] = useState<string | null>(null)
+
+    useEffect(() => {
+        // Obtém o garden_id do localStorage (ou de um token se necessário)
+        const garden_id = localStorage.getItem('garden_id') // ou o valor passado via login
+        if (garden_id) {
+            setGardenId(garden_id)
+        }
+    }, [])
+
     useEffect(() => {
         const fetchSensors = async () => {
+            if (!gardenId) return
+
             try {
                 setLoading(true)
                 setError(null)
-                const response = await axios.get("/api/sensors?zone_id=68f90ebdd48e8e21583df061")
-                setSensors(response.data)
+
+                // Buscar o garden apenas 1x para pegar o array de sensor_ids
+                const gardenResponse = await axios.get(`/api/gardens/${gardenId}`)
+                const gardenData = gardenResponse.data
+
+                // Verifica se o garden contém o array correto
+                const sensorIds = gardenData?.sensor_ids || gardenData?.sensors || []
+
+                if (sensorIds.length === 0) {
+                    setSensors([])
+                    return
+                }
+
+                // Função para atualizar sensores periodicamente
+                const fetchSensorData = async () => {
+                    try {
+                        const sensorRequests = sensorIds.map((id: string) =>
+                            axios.get(`/api/sensors/${id}`)
+                        )
+
+                        const sensorsResponses = await Promise.all(sensorRequests)
+                        const sensorsData = sensorsResponses.map(res => res.data)
+                        setSensors(sensorsData)
+                    } catch (err) {
+                        console.error("[v0] Error fetching sensors:", err)
+                        setError("Erro ao carregar sensores")
+                    }
+                }
+
+                // Busca inicial dos sensores
+                await fetchSensorData()
+
+                // Atualização a cada 3 segundos
+                const interval = setInterval(fetchSensorData, 3000)
+                return () => clearInterval(interval)
+
             } catch (err) {
-                console.error("[v0] Error fetching sensors:", err)
+                console.error("[v0] Error fetching garden/sensors:", err)
                 setError("Erro ao carregar sensores")
             } finally {
                 setLoading(false)
@@ -47,11 +83,7 @@ export function SensorMonitoring() {
         }
 
         fetchSensors()
-
-        // Refresh every 3 seconds for real-time data
-        const interval = setInterval(fetchSensors, 3000)
-        return () => clearInterval(interval)
-    }, [])
+    }, [gardenId])
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -101,7 +133,7 @@ export function SensorMonitoring() {
         )
     }
 
-    const getLatestValue = (sensor: Sensor) => {
+    const getLatestValue = (sensor: ISensor) => {
         if (sensor.data && sensor.data.length > 0) {
             return sensor.data[sensor.data.length - 1].value
         }
@@ -116,7 +148,7 @@ export function SensorMonitoring() {
             acc[sensor.sensor_type].push(sensor)
             return acc
         },
-        {} as Record<string, Sensor[]>,
+        {} as Record<string, ISensor[]>,
     )
 
     return (
@@ -183,7 +215,7 @@ export function SensorMonitoring() {
 
                     <div className="grid md:grid-cols-2 gap-4">
                         {sensors?.map((sensor) => (
-                            <Card key={sensor._id.$oid}>
+                            <Card key={sensor._id}>
                                 <CardHeader>
                                     <CardTitle className="text-base flex items-center justify-between">
                                         <span>{sensor.name}</span>
@@ -235,7 +267,7 @@ export function SensorMonitoring() {
                                 <CardContent>
                                     <div className="grid md:grid-cols-3 gap-3">
                                         {typeSensors.map((sensor) => (
-                                            <div key={sensor._id.$oid} className="p-3 rounded-lg border bg-card">
+                                            <div key={sensor._id} className="p-3 rounded-lg border bg-card">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="font-medium text-sm">{sensor.name}</span>
                                                     <div
@@ -257,7 +289,7 @@ export function SensorMonitoring() {
                 <TabsContent value="status" className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                         {sensors?.map((sensor) => (
-                            <Card key={sensor._id.$oid}>
+                            <Card key={sensor._id}>
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
