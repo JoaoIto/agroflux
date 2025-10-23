@@ -24,6 +24,7 @@ export default function LoginPage() {
 
       // Armazena o token JWT no localStorage
       localStorage.setItem('auth_token', token)
+      localStorage.setItem('user_id', userId)
 
       // Redireciona com base no profile_type
       if (profile_type === "large") {

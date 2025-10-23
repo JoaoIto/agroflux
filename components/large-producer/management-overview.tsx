@@ -5,47 +5,35 @@ import axios from "axios"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Droplets, TrendingDown, TrendingUp, AlertTriangle, Zap } from "lucide-react"
 
-type Zone = {
-    _id: { $oid: string }
-    garden_id: string
-    name: string
-    location: { latitude: number; longitude: number }
-    area: number
-}
-
-type Culture = {
-    _id: { $oid: string }
-    name: string
-    type: string
-    ideal_conditions: string
-}
-
 export function ManagementOverview() {
-    const [zones, setZones] = useState<Zone[]>([])
-    const [cultures, setCultures] = useState<Culture[]>([])
+    const [zones, setZones] = useState<IZone[]>([])
+    const [cultures, setCultures] = useState<ICulture[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true)
-                setError(null)
+    const fetchData = async () => {
+        try {
+            setLoading(true)
+            setError(null)
 
-                const [zonesResponse, culturesResponse] = await Promise.all([
-                    axios.get("/api/zones?garden_id=68f90e39d48e8e21583df060"),
-                    axios.get("/api/cultures"),
-                ])
+            const garden_id = localStorage.getItem('garden_id')
 
-                setZones(zonesResponse.data)
-                setCultures(culturesResponse.data)
-            } catch (err) {
-                console.error("[v0] Error fetching data:", err)
-                setError("Erro ao carregar dados")
-            } finally {
-                setLoading(false)
-            }
+            const [zonesResponse, culturesResponse] = await Promise.all([
+                axios.get(`/api/zones?garden_id=${garden_id}`),
+                axios.get("/api/cultures"),
+            ])
+
+            setZones(zonesResponse.data)
+            setCultures(culturesResponse.data)
+        } catch (err) {
+            console.error("[v0] Error fetching data:", err)
+            setError("Erro ao carregar dados")
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
 
         fetchData()
 
@@ -189,7 +177,7 @@ export function ManagementOverview() {
                                 const status = usage > optimal ? "warning" : "optimal"
 
                                 return (
-                                    <div key={zone._id.$oid} className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                                    <div key={zone._id} className="flex items-center justify-between p-4 rounded-lg border bg-card">
                                         <div className="flex items-center gap-4 flex-1">
                                             <div
                                                 className={`h-3 w-3 rounded-full ${
@@ -231,24 +219,24 @@ export function ManagementOverview() {
                 </CardContent>
             </Card>
 
-            {cultures && cultures.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Culturas Disponíveis</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {cultures.map((culture) => (
-                                <div key={culture._id.$oid} className="p-3 rounded-lg border bg-card">
-                                    <div className="font-medium">{culture.name}</div>
-                                    <div className="text-xs text-muted-foreground mt-1">{culture.type}</div>
-                                    <div className="text-xs text-muted-foreground mt-2">{culture.ideal_conditions}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+            {cultures.map((culture) => (
+                <div key={culture._id} className="p-3 rounded-lg border bg-card">
+                    <div className="font-medium">{culture.name}</div>
+
+                    <div className="text-xs text-muted-foreground mt-2">
+                        {culture.optimal_conditions?.humidity_range
+                            ? `${culture.optimal_conditions.humidity_range[0]} - ${culture.optimal_conditions.humidity_range[1]}`
+                            : "Faixa de umidade não definida"}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground mt-2">
+                        {culture.optimal_conditions?.temperature_range
+                            ? `${culture.optimal_conditions.temperature_range[0]} - ${culture.optimal_conditions.temperature_range[1]}`
+                            : "Faixa de temperatura não definida"}
+                    </div>
+                </div>
+            ))}
+
         </div>
     )
 }

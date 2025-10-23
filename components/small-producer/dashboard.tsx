@@ -30,8 +30,23 @@ export function SmallProducerDashboard() {
     const fetchGardens = async () => {
         try {
             setGardensError(null)
-            const response = await axios.get("/api/gardens")
+
+            // Obtém o user_id do localStorage
+            const userId = localStorage.getItem('user_id')
+
+            if (!userId) {
+                throw new Error("User ID not found in localStorage")
+            }
+
+            // Faz a requisição para pegar os jardins do usuário
+            const response = await axios.get(`/api/gardens?user_id=${userId}`)
+
             setGardens(response.data)
+
+            if (response.data.length > 0) {
+                // Armazena o ID do primeiro jardim no localStorage (ou você pode escolher outro jardim)
+                localStorage.setItem('garden_id', response.data[0]._id)
+            }
         } catch (error) {
             console.error("[v0] Error fetching gardens:", error)
             setGardensError("Erro ao carregar hortas")
