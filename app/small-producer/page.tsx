@@ -1,4 +1,4 @@
-import { SmallProducerDashboard } from "@/components/dashboard"
+import { SmallProducerDashboard } from "@/components/small-producer/dashboard"
 import { Suspense } from "react"
 
 export default function SmallProducerPage() {
