@@ -1,113 +1,179 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Droplets } from "lucide-react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Eye, EyeOff, User2 } from "lucide-react"
+
+// Imagens em app/img (ajuste os caminhos se estiverem em /public/img)
+import logoAgro from "@/app/img/Logo Agroflux - Hackaton.png"
+import bgLogin from "@/app/img/background-login.png"
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
     try {
-      // Envia a requisição para a API de login
+      setLoading(true)
+      setError(null)
+
+      // Requisição para API de login
       const response = await axios.post("/api/auth/login", { email, password })
-      const { token, userId, profile_type } = response.data // Desestruturando a resposta
+      const { token, userId, profile_type } = response.data
 
-      // Armazena o token JWT no localStorage
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('user_id', userId)
+      // Persistência do token / dados
+      localStorage.setItem("auth_token", token)
+      localStorage.setItem("user_id", userId)
+      if (remember) localStorage.setItem("remember_me", "1")
+      else localStorage.removeItem("remember_me")
 
-      // Redireciona com base no profile_type
-      if (profile_type === "large") {
-        router.push("/large-producer") // Se for grande produtor
-      } else {
-        router.push("/small-producer") // Se for pequeno produtor
-      }
-
-    } catch (error) {
-      console.error("Error during login:", error)
+      // Redireciona por tipo de perfil
+      if (profile_type === "large") router.push("/large-producer")
+      else router.push("/small-producer")
+    } catch (err) {
+      console.error("Error during login:", err)
       setError("Email ou senha inválidos.")
+    } finally {
+      setLoading(false)
     }
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await handleLogin()
+  }
+
   return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Droplets className="h-8 w-8 text-primary" />
-              <span className="text-3xl font-bold">AgroFlux</span>
+    <div
+      className="min-h-[100svh] w-full flex flex-col items-center justify-center px-4 relative"
+      style={{
+        backgroundImage: `url(${bgLogin.src})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* overlay/gradiente (mantendo suas cores) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#7D8453]/25 via-[#C06C50]/10 to-black/60" />
+
+      {/* Card central — blur reduzido */}
+      <Card className="relative w-full max-w-md rounded-3xl border-white/20 bg-white/15 backdrop-blur-md shadow-2xl">
+        <CardHeader className="pt-8 pb-4 text-center">
+          {/* Logo AgroFlux */}
+          <div className="flex w-full justify-center">
+            <Image src={logoAgro} alt="AgroFlux" priority className="h-10 w-auto" />
+          </div>
+          <p className="mt-3 text-sm text-white/80">
+            Bem-vindo de volta — acesse sua conta
+          </p>
+        </CardHeader>
+
+        <CardContent className="pb-8 px-8">
+          {/* Mensagem de erro */}
+          {error && (
+            <div className="mb-4 rounded-md bg-red-500/15 border border-red-500/30 px-3 py-2 text-sm text-red-100">
+              {error}
             </div>
-            <CardTitle>Bem-vindo</CardTitle>
-            <CardDescription>Faça login para acessar sua conta</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && <div className="text-red-600 mb-4">{error}</div>} {/* Exibe erro se houver */}
-            <Tabs defaultValue="small" className="w-full">
+          )}
 
-              <TabsContent value="small" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-small">Email</Label>
-                  <Input
-                      id="email-small"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-small">Senha</Label>
-                  <Input
-                      id="password-small"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button className="w-full" onClick={handleLogin}>
-                  Entrar
-                </Button>
-              </TabsContent>
+          {/* Formulário único */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white">Email</Label>
+              <div className="relative">
+                <User2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="pl-10 bg-white/80 focus:bg-white border-white/40 placeholder:text-black/40"
+                  autoComplete="email"
+                />
+              </div>
+            </div>
 
-              <TabsContent value="large" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-large">Email</Label>
-                  <Input
-                      id="email-large"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-large">Senha</Label>
-                  <Input
-                      id="password-large"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button className="w-full" onClick={handleLogin}>
-                  Entrar
-                </Button>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Senha */}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-white">Senha</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="pr-10 bg-white/80 focus:bg-white border-white/40 placeholder:text-black/40"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-black/70"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Lembrar-me / Esqueci */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2">
+                <Checkbox
+                  id="remember"
+                  checked={remember}
+                  onCheckedChange={(v) => setRemember(Boolean(v))}
+                />
+                <span className="text-sm text-white/90">Lembrar-me</span>
+              </label>
+
+              <a
+                href="/reset-password"
+                className="text-sm underline underline-offset-4 text-white/90 hover:text-white"
+              >
+                Esqueci minha senha
+              </a>
+            </div>
+
+            {/* Botão Entrar — cores que você definiu */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 text-base font-semibold rounded-xl shadow-lg bg-gradient-to-r from-[#0290d3] to-[#5cac4c] hover:opacity-95 transition"
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+
+            {/* Criar conta */}
+            <p className="text-center text-sm text-white/90">
+              Não tem uma conta?{" "}
+              <a href="/signup" className="font-semibold underline underline-offset-4 hover:text-white">
+                Criar conta
+              </a>
+            </p>
+
+            {/* Rodapé */}
+            <p className="mt-2 text-center text-[11px] text-white/70">
+              Irrigação inteligente e uso eficiente da água
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
