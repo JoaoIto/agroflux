@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, User2 } from "lucide-react"
 
-// Imagens em app/img (ajuste os caminhos se estiverem em /public/img)
+// Imagens (ajuste caminho se estiverem em /public/img)
 import logoAgro from "@/app/img/Logo Agroflux - Hackaton.png"
 import bgLogin from "@/app/img/background-login.png"
 
@@ -25,35 +25,37 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // === mesma lógica do João Victor ===
   const handleLogin = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Requisição para API de login
+      // Se sua API não está no mesmo host, use baseURL:
+      // const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, { email, password }, { withCredentials: true })
       const response = await axios.post("/api/auth/login", { email, password })
+
       const { token, userId, profile_type } = response.data
 
-      // Persistência do token / dados
       localStorage.setItem("auth_token", token)
       localStorage.setItem("user_id", userId)
-      if (remember) localStorage.setItem("remember_me", "1")
-      else localStorage.removeItem("remember_me")
 
-      // Redireciona por tipo de perfil
-      if (profile_type === "large") router.push("/large-producer")
-      else router.push("/small-producer")
-    } catch (err) {
+      if (profile_type === "large") {
+        router.push("/large-producer")
+      } else {
+        router.push("/small-producer")
+      }
+    } catch (err: any) {
+      // Mostra mensagem vinda da API se existir; senão mostra padrão
+      const apiMsg =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "Email ou senha inválidos."
+      setError(apiMsg)
       console.error("Error during login:", err)
-      setError("Email ou senha inválidos.")
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await handleLogin()
   }
 
   return (
@@ -65,13 +67,12 @@ export default function LoginPage() {
         backgroundPosition: "center",
       }}
     >
-      {/* overlay/gradiente (mantendo suas cores) */}
+      {/* overlay/gradiente */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#7D8453]/25 via-[#C06C50]/10 to-black/60" />
 
-      {/* Card central — blur reduzido */}
+      {/* Card central */}
       <Card className="relative w-full max-w-md rounded-3xl border-white/20 bg-white/15 backdrop-blur-md shadow-2xl">
         <CardHeader className="pt-8 pb-4 text-center">
-          {/* Logo AgroFlux */}
           <div className="flex w-full justify-center">
             <Image src={logoAgro} alt="AgroFlux" priority className="h-10 w-auto" />
           </div>
@@ -81,15 +82,15 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent className="pb-8 px-8">
-          {/* Mensagem de erro */}
+          {/* erro */}
           {error && (
             <div className="mb-4 rounded-md bg-red-500/15 border border-red-500/30 px-3 py-2 text-sm text-red-100">
               {error}
             </div>
           )}
 
-          {/* Formulário único */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* campos (sem <form> e sem submit; botão chama handleLogin) */}
+          <div className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white">Email</Label>
@@ -150,9 +151,9 @@ export default function LoginPage() {
               </a>
             </div>
 
-            {/* Botão Entrar — cores que você definiu */}
+            {/* Entrar (mesmas cores que você escolheu) */}
             <Button
-              type="submit"
+              onClick={handleLogin}
               disabled={loading}
               className="w-full h-12 text-base font-semibold rounded-xl shadow-lg bg-gradient-to-r from-[#0290d3] to-[#5cac4c] hover:opacity-95 transition"
             >
@@ -171,7 +172,7 @@ export default function LoginPage() {
             <p className="mt-2 text-center text-[11px] text-white/70">
               Irrigação inteligente e uso eficiente da água
             </p>
-          </form>
+          </div>
         </CardContent>
       </Card>
     </div>
