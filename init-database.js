@@ -10,7 +10,7 @@
 const { MongoClient } = require('mongodb');
 
 // Configuração da URI do MongoDB (mesmo do .env.local)
-const MONGODB_URI = 'mongodb://localhost:27017/agroflux';
+const MONGODB_URI = 'mongodb://localhost:32768/agroflux';
 const DB_NAME = 'agroflux';
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -79,18 +79,20 @@ async function initDatabase() {
           })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
           console.log('   ✓ Usuário criado com sucesso!');
           console.log('   📧 Email: produtor@email.com');
           console.log('   🔑 Senha: 123456\n');
         } else {
-          const error = await response.json();
-          console.log(`   ⚠️  Erro ao criar usuário via API: ${error.error || 'Unknown error'}`);
+          console.log(`   ⚠️  Erro ao criar usuário via API: ${data.error || 'Unknown error'}`);
           console.log('   💡 Certifique-se de que o servidor está rodando em http://localhost:3000\n');
         }
       } catch (error) {
         console.log('   ❌ Erro ao conectar com a API:', error.message);
-        console.log('   💡 Execute: npm run dev (em outro terminal)\n');
+        console.log('   💡 Execute: npm run dev (em outro terminal)');
+        console.log('   💡 Ou o servidor pode estar usando outra porta\n');
       }
     } else {
       console.log('   ⚠ Coleção já contém dados\n');
@@ -293,19 +295,17 @@ async function initDatabase() {
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`\n⏱️  Tempo de execução: ${elapsed}s\n`);
-
-    console.log('📝 Próximos Passos:');
+    console.log(`\n⏱️  Tempo de execução: ${elapsed}s\n`);    console.log('📝 Próximos Passos:');
     if (seedMode || forceMode) {
       console.log('   ✅ Banco completo com dados de exemplo!');
       console.log('   1. Execute: npm run dev');
       console.log('   2. Acesse: http://localhost:3000');
-      console.log('   3. Login: admin@agroflux.com / admin123\n');
+      console.log('   3. Login: produtor@email.com / 123456\n');
     } else {
       console.log('   1. Execute: node init-database.js --seed (dados completos)');
       console.log('   2. Execute: node add-example-zones.js (apenas zonas)');
-      console.log('   3. Registre um usuário: POST /api/auth/register');
-      console.log('   4. Acesse: http://localhost:3000\n');
+      console.log('   3. Acesse: http://localhost:3000');
+      console.log('   4. Login: produtor@email.com / 123456\n');
     }
 
   } catch (error) {

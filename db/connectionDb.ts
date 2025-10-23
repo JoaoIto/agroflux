@@ -42,7 +42,7 @@ export async function getMongoClient(): Promise<MongoClient> {
   try {
     const client = await clientPromise
     // Testa a conexão
-    await client.db("hackaton-scti-agua").command({ ping: 1 })
+    await client.db("agroflux").command({ ping: 1 })
     console.log("[v0] Conexão ao MongoDB estabelecida com sucesso!")
     return client
   } catch (error) {
@@ -52,7 +52,7 @@ export async function getMongoClient(): Promise<MongoClient> {
 }
 
 // Função para obter o banco de dados
-export async function getDatabase(dbName = "hackaton-scti-agua") {
+export async function getDatabase(dbName = "agroflux") {
   const client = await getMongoClient()
   return client.db(dbName)
 }
