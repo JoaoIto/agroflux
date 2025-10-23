@@ -35,13 +35,9 @@ export function ZoneForm() {
   const [currentSensorType, setCurrentSensorType] = useState("")
 
   const sensorTypes = [
-    { id: "soil-moisture", label: "Umidade do Solo" },
+    { id: "bomb", label: "Bomba de água" },
     { id: "temperature", label: "Temperatura" },
-    { id: "air-humidity", label: "Umidade do Ar" },
-    { id: "evapotranspiration", label: "Evapotranspiração" },
-    { id: "wind", label: "Vento" },
-    { id: "rain", label: "Pluviômetro" },
-    { id: "light", label: "Luminosidade" },
+    { id: "soil-humidity", label: "Umidade do Solo" },
   ]
 
   const handleAddSensorLocation = (lat: number, lng: number) => {
